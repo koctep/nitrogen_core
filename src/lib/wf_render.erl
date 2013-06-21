@@ -29,6 +29,30 @@ render(Elements, Actions, Anchor, Trigger, Target) ->
 
     % Return.
     Script=[Script1, Script2],
-    {ok, Html, Script}.
+    {ok, Html1} = set_modules_html(iolist_to_binary(Html)),
+    {ok, Html1, Script}.
 
+set_modules_html(Html) ->
+    set_module_html(re:split(Html, "\\[\\[(.*)\\]\\]", [ungreedy, {parts, 2}])).
 
+set_module_html([Html, ModuleStr | Rest]) ->
+    Elements = case re:split(ModuleStr, "/") of
+        [<<"script">>] -> [];
+        [<<"mobile_script">>] -> mobile_script;
+        [ModuleBin] ->
+            Module = wf:to_atom(ModuleBin),
+            callback(Module, view, []);
+        [ModuleBin, FunBin | ArgV] ->
+            Module = wf:to_atom(ModuleBin),
+            Fun = wf:to_atom(FunBin),
+            callback(Module, Fun, ArgV)
+    end,
+    {ok, Html1} = wf_render_elements:render_elements(Elements),
+    set_modules_html(iolist_to_binary([Html, Html1 | Rest]));
+set_module_html(Data) ->
+    {ok, binary_to_list(iolist_to_binary(Data))}.
+
+callback(page, Fun, Args) ->
+    callback(wf_context:page_module(), Fun, Args);
+callback(Module, Fun, Args) ->
+    erlang:apply(Module, Fun, Args).

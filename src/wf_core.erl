@@ -86,7 +86,11 @@ finish_dynamic_request() ->
     StateScript = serialize_context(),
     JavascriptFinal = [StateScript, Javascript1 ++ Javascript2],
     case wf_context:type() of
-        first_request       -> build_first_response(Html1 ++ Html2, JavascriptFinal);
+        first_request       -> build_first_response(Html1
+                                                    ++ Html2
+                                                    ++ "<script>"
+                                                    ++ JavascriptFinal
+                                                    ++ "</script>");
         postback_request    -> build_postback_response(JavascriptFinal)
     end.
 
@@ -199,13 +203,10 @@ build_static_file_response(Path) ->
     Response1 = Response:file(Path),
     Response1:build_response().
 
-build_first_response(Html, Script) ->
-    % Update the output with any script...
-    Html1 = replace_script(Script, Html),
-
+build_first_response(Html) ->
     % Update the response bridge and return.
     Response = wf_context:response_bridge(),
-    Response1 = Response:data(Html1),
+    Response1 = Response:data(Html),
     Response1:build_response().
 
 build_postback_response(Script) ->
