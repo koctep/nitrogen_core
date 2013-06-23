@@ -40,10 +40,10 @@ set_module_html([Html, ModuleStr | Rest]) ->
         [<<"script">>] -> [];
         [<<"mobile_script">>] -> mobile_script;
         [ModuleBin] ->
-            Module = wf:to_atom(ModuleBin),
+            Module = wf:to_atom(<<<<"ems_">>/binary, ModuleBin/binary>>),
             callback(Module, view, []);
         [ModuleBin, FunBin | ArgV] ->
-            Module = wf:to_atom(ModuleBin),
+            Module = wf:to_atom(<<<<"ems_">>/binary, ModuleBin/binary>>),
             Fun = wf:to_atom(FunBin),
             callback(Module, Fun, ArgV)
     end,
