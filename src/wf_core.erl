@@ -165,7 +165,7 @@ call_init_on_handlers() ->
 % the 'render' handler should go last to make sure that it captures all changes
 % put in place by the other handlers.
 call_finish_on_handlers() ->
-    Handlers = wf_context:handlers(),
+    Handlers = lists:reverse(wf_context:handlers()),
     [wf_handler:call(X#handler_context.name, finish) || X <- Handlers],
     ok.	
 
